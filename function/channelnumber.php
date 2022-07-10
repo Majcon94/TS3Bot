@@ -16,7 +16,7 @@
 						if(!empty($matches[1][0])){
 							if($matches[1][0] != $i){
 								$matches[2][0] = $matches[2][0] ?? NULL;
-								if(!empty($matches[2][0]) && $matches[2][0]{0} == trim($this->config['functions_ChannelNumber']['separator'])){
+								if(!empty($matches[2][0]) && mb_substr($matches[2][0], 0, 1) == trim($this->config['functions_ChannelNumber']['separator'])){
 									$matches[2][0] = trim(substr(trim($matches[2][0]), 1));
 								}
 								self::$tsAdmin->channelEdit($chl['cid'], ['channel_name' => substr($i.$this->config['functions_ChannelNumber']['separator'].$matches[2][0], 0, 40)]);

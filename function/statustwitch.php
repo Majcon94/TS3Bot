@@ -4,6 +4,7 @@
 
 		private static $statusTwitch_time = 0;
 		private static $statusTwitch_online = [];
+		private static $statusTwitchDescription = [];
 		private $token = NULL;
 		private $users = NULL;
 		private $follows = NULL;
@@ -19,8 +20,9 @@
 				CURLOPT_RETURNTRANSFER => true,
 			]);
 			$token = json_decode(curl_exec($ch), true);
-			if(!$token['access_token']){
-				// tu log że ni ma tokena
+			if(!isset($token['access_token'])){
+				$this->bot->log(1, 'Brak tokenu Funkcja: statusTwitch()');
+
 			}else{
 				$this->token = $token['access_token'];
 			}
@@ -67,8 +69,12 @@
 			]);
 			$emotes = json_decode(curl_exec($ch));
 			$emot = NULL;
-			foreach($emotes->emotes as $e){
-				$emot .= "[img]https://static-cdn.jtvnw.net/emoticons/v1/{$e->id}/1.0[/img] {$e->code}\n";
+			if($emotes){
+				if(isset($emotes->emotes)){
+					foreach($emotes->emotes as $e){
+						$emot .= "[img]https://static-cdn.jtvnw.net/emoticons/v1/{$e->id}/1.0[/img] {$e->code}\n";
+					}
+				}
 			}
 			$this->emot = $emot;
 		}
@@ -99,6 +105,9 @@
 					if(empty(self::$statusTwitch_online[$this->users->data[0]->id])){
 						self::$statusTwitch_online[$this->users->data[0]->id] = 0;
 					}
+					if(empty(self::$statusTwitchDescription[$this->users->data[0]->id])){
+						self::$statusTwitchDescription[$this->users->data[0]->id] = NULL;
+					}
 					if(!empty($this->streams->data[0])){
 						$ch = curl_init();
 							curl_setopt_array($ch, [
@@ -115,21 +124,12 @@
 						$txt_time = $this->bot->wyswietl_czas($data, 1, 1, 1, 0, 0);
 						$statusTwitch_name = self::$l->sprintf($value['channel_name'], '[Online]');
 						$channel_description = self::$l->sprintf(self::$l->online_StatusTwitch, $this->users->data[0]->profile_image_url, 'https://twitch.tv/'.$this->streams->data[0]->user_name, $this->streams->data[0]->user_name, $games->data[0]->name, $this->streams->data[0]->title, $this->streams->data[0]->viewer_count, $txt_time, $this->follows->total, $this->emot);
-						$channelinfo = self::$tsAdmin->getElement('data', self::$tsAdmin->channelInfo($cid));
-						if($channelinfo['channel_description'] != $channel_description){
-							$data['channel_description'] = $channel_description;
-							if($channelinfo['channel_name'] != $statusTwitch_name){
-								$data['channel_name'] = $statusTwitch_name;
-							}
-							$channelEdit = self::$tsAdmin->channelEdit($cid, $data);
-							if(!empty($channelEdit['errors'][0]) && $channelEdit['errors'][0] != 'ErrorID: 771 | Message: channel name is already in use'){
-								$this->bot->log(1, 'Kanał o ID:'.$cid.' nie istnieje Funkcja: statusTwitch()');
-							}
-						}
 						if(self::$statusTwitch_online[$this->users->data[0]->id] == 0 && $value['info'] == true){
 							self::$statusTwitch_online[$this->users->data[0]->id] = 1;
 							foreach($this->bot->getClientList() as $cl) {
-								self::$tsAdmin->sendMessage(1, $cl['clid'], self::$l->sprintf($value['info_text'], $this->streams->data[0]->user_name, 'https://twitch.tv/'.$this->streams->data[0]->user_name));
+								if($value['gid'] == 0 || array_intersect(explode(',', $cl['client_servergroups']), $value['gid'])){
+									self::$tsAdmin->sendMessage(1, $cl['clid'], self::$l->sprintf($value['info_text'], $this->streams->data[0]->user_name, 'https://twitch.tv/'.$this->streams->data[0]->user_name));
+								}
 							}
 						}
 					}else{
@@ -138,16 +138,19 @@
 						}
 						$statusTwitch_name = self::$l->sprintf($value['channel_name'], '[Offline]');
 						$channel_description = self::$l->sprintf(self::$l->offline_StatusTwitch, $this->users->data[0]->profile_image_url, 'https://twitch.tv/'.$this->users->data[0]->display_name, $this->users->data[0]->display_name, $this->follows->total, $this->emot);
-						$channelinfo = self::$tsAdmin->getElement('data', self::$tsAdmin->channelInfo($cid));
-						if($channelinfo['channel_description'] != $channel_description){
-							$data['channel_description'] = $channel_description;
-							if($channelinfo['channel_name'] != $statusTwitch_name){
-								$data['channel_name'] = $statusTwitch_name;
-							}
-							$channelEdit = self::$tsAdmin->channelEdit($cid, $data);
-							if(!empty($channelEdit['errors'][0]) && $channelEdit['errors'][0] != 'ErrorID: 771 | Message: channel name is already in use'){
-								$this->bot->log(1, 'Kanał o ID:'.$cid.' nie istnieje Funkcja: statusTwitch()');
-							}
+					}
+					$channelinfo = self::$tsAdmin->getElement('data', self::$tsAdmin->channelInfo($cid));
+					if(self::$statusTwitchDescription[$this->users->data[0]->id] != $channel_description){
+						$data['channel_description'] = $channel_description;
+						self::$statusTwitchDescription[$this->users->data[0]->id] = $channel_description;
+					}
+					if($channelinfo['channel_name'] != $statusTwitch_name){
+						$data['channel_name'] = $statusTwitch_name;
+					}
+					if(isset($data['channel_name']) || isset($data['channel_description'])){
+						$channelEdit = self::$tsAdmin->channelEdit($cid, $data);
+						if(!empty($channelEdit['errors'][0]) && $channelEdit['errors'][0] != 'ErrorID: 771 | Message: channel name is already in use'){
+							$this->bot->log(1, 'Kanał o ID:'.$cid.' nie istnieje Funkcja: statusTwitch()');
 						}
 					}
 				}

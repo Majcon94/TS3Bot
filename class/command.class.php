@@ -22,7 +22,6 @@
 			self::$l = $bot->getLang();
 			self::$db = $bot->getDb();
 		}
-
 	}
 
 ?>

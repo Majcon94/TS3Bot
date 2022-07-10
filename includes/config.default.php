@@ -111,7 +111,8 @@
 				'channel_password' 							=> '',
 				'channel_codec'								=> 4,
 				'channel_codec_quality'						=> 6,
-				'channel_flag_semi_permanent'				=> 0,					'channel_needed_talk_power'					=> 0,
+				'channel_flag_semi_permanent'				=> 0,
+				'channel_needed_talk_power'					=> 0,
 			],	//Dodatkowe ustawienia kanału głównego.
 			'setting_subchannel'	=> [
 				'channel_flag_permanent' 					=> 1,
@@ -144,28 +145,81 @@
 			]
 		],
 
-		//ChanneMessege() Funkcja wysyła wiadomość po wejściu na kanał o podanym ID
-		'functions_ChanneMessege' => [
-			'on'	=> true,	//true - włączona false - wyłączona
-			'inst'	=> 3, //ID Instancji 
-			'cid'	=> [
-				6117 => [	//ID kanału.
-					'type' => 1,	//Typ 1 - wiadomość na pw 2 - poke
-					'text' =>'Witaj na kanale boskiego Majcona!'	//Treść wiadomości którą ma otrzymać
-				],
-				5852 => [	//ID kanału.
-					'type' => 2,	//Typ 1 - wiadomość na pw 2 - poke
-					'text' =>'Może kiedyś pogadacie ;)'	//Treść wiadomości którą ma otrzymać
-				]
-			]
-		],
-
 	//ChannelNumber() Funkcja sprawdza i w razie, czego poprawia numer kanału.
 		'functions_ChannelNumber' => [
 			'on'			=> false,	//true - włączona false - wyłączona
 			'inst'			=> 1, //ID Instancji 
 			'pid'			=> 2,	//Strefa, w której ma sprawdzać numery.
 			'separator'		=> '. '	//Separator oddzielający nazwę kanału od numeru.
+		],
+
+	//Clan() Funkcja tworzy strefe dla clanu.
+		'functions_Clan' => [
+			'on'	=> false,	//true - włączona false - wyłączona
+			'inst'	=> 1, //ID Instancji
+			'cgid'	=> 8, //ID Grupy kanału Guest
+			'cid'	=> 6371,	//ID kanału na który urzytkownik będzie przenoszony w celu otrzymania strefy
+			'co'	=> 6371,	//ID kanału po którym ma stworzyć pierwszy kanał gildi
+			'cgidl'	=>	21,	//ID grupy którą ma kopiować dla lidera
+			'cgnl'	=>	'{1} Lider',	//Nazwa grupy lidera
+			'cgidd'	=>	22,	//ID grupy którą ma kopiować dla pozostalych
+			'cgnd'	=>	'{1}',	//Nazwa grupy, którą kopiuje dla pozostałych
+			'title_lider'	=>	'[CENTER][SIZE=16][COLOR=#A12364][B]Lider[/B][/COLOR][/SIZE][/CENTER]\n',
+			'title_dostepny'	=>	'[CENTER][SIZE=16][COLOR=#A12364][B]Dostępny[/B][/COLOR][/SIZE][/CENTER]\n',
+			'name_online' => true,	//Czy ma zmieniać nazwę kanału.
+			'time_info' => true,	//Czy ma wyświetlać czas offline.
+			'channel_info' => true,	//Czy ma wyświetlać nazwę kanału.
+			'channel'	=>	[	//Schemat kanałów które ma stworzyć.
+				[
+					'name'	=> '[*spacer_{1}{2}]-',	//Nazwa kanału
+					'type'	=>	'spacer',	//Typ
+					'join_power'	=>	15,	//Wymagana moc dołączenia
+					'sub'	=> ''	//Sub kanał
+				],
+				[
+					'name'	=> '[cspacer_{1}]{1} {3}/{4}',
+					'type'	=>	'grouponline',
+					'join_power'	=>	15,
+					'sub'	=> ''
+				],
+				[
+					'name'	=> '[*spacer_{1}{2}]-',
+					'type'	=>	'spacer',
+					'join_power'	=>	15,
+					'sub'	=> [
+						[
+							'name'	=> '{1} Lider',
+							'type'	=>	'lider',
+							'join_power'	=>	10,
+							'sub'	=> ''
+						],
+						[
+							'name'	=> 'Jakis kanał 1',
+							'type'	=>	'limit',
+							'join_power'	=>	5,
+							'sub'	=> ''
+						],
+						[
+							'name'	=> 'Jakiś kanał 2',
+							'type'	=>	'limit',
+							'join_power'	=>	5,
+							'sub'	=> ''
+						],
+						[
+							'name'	=> 'Nadaj zabierz rangę',
+							'type'	=>	'ranga',
+							'join_power'	=>	5,
+							'sub'	=> ''
+						],
+						[
+							'name'	=> 'Poczekalnia',
+							'type'	=>	'unlimited',
+							'join_power'	=>	0,
+							'sub'	=> ''
+						]
+					]
+				]
+			]
 		],
 
 	//CleanChannel() Funkcja czyści kanały, które nie są aktywne dłużej niż x dni w podanym sektorze.
@@ -213,10 +267,10 @@
 			'on'		=> false,	//true - włączona false - wyłączona
 			'inst'		=> 1, //ID Instancji 
 			'gid'		=> [
-				0	//Strefa, w której ma sprawdzać numery.
+				0	//ID Grup które ma pomijać
 			],
 			'cldbid'	=> [
-				6	//Separator oddzielający nazwę kanału od numeru.
+				6	//DBID użytkownika którego ma pomijać.
 			]
 		],
 
@@ -298,6 +352,28 @@
 			'gid'	=> '1,2,3',	//ID Group, które ma nie wyrzucać za limit.
 			'limit'	=> 3	//Limit kont z tym samym IP.
 		],
+
+	//MonitoringPublicChannels() Funkcja monitoruje kanały publiczne
+	'functions_MonitoringPublicChannels' => [
+		'on'	=> false,	//true - włączona false - wyłączona
+		'inst'	=> 1, //ID Instancji 
+		'config'	=> [
+			1	=>	[	//Id kanału nadrzędnego.
+				'channel_maxclients'	=> 0,	//Maksymalna liczba klientów 0 - bezlimitu.
+				'channel_name'	=> 'Publiczny bez limitu {$1}',	//Nazwa kanału {1} - oznacza liczbę kanału.
+				'channel_description'	=> '',	//Opis kanału.
+				'number_permanent_channels'	=>	5,	//Liczba stałych kanałów, które mają być zawsze.
+				'minimal_number_channels'	=>	1	//Minimalna liczba wolnych kanałów.
+			],
+			2	=>	[
+				'channel_maxclients'	=> 2,	//Maksymalna liczba klientów 0 - bezlimitu.
+				'channel_name'	=> 'Publiczny 2os {$1}',	//Nazwa kanału {1} - oznacza liczbę kanału.
+				'channel_description'	=> '',	//Opis kanału.
+				'number_permanent_channels'	=>	5,	//Liczba stałych kanałów, które mają być zawsze.
+				'minimal_number_channels'	=>	1	//Minimalna liczba wolnych kanałów.
+			]
+		]
+	],
 
 	//MoveAfk() Funkcja przenosi nieaktywne osoby na kanał o podanym ID.
 		'functions_MoveAfk' => [
@@ -450,8 +526,9 @@
 			'cid_name'	=> [
 				1 => [	//ID kanału w którym ma ustawiać opis oraz nazwę.
 					'users' => 'kayser',	//Nick osoby na twitchu.
-					'channel_name' => '[cspacer8] Stream kayserv {1}',	//Nazwa kanału jaką ma ustawiać {1} jest zamienianę na online lub offline.
+					'channel_name' => '[cspacer8] Stream kayser {1}',	//Nazwa kanału jaką ma ustawiać {1} jest zamienianę na online lub offline.
 					'info'	=>	true, //Czy ma wysyłać informacje o tym, że użytkownik rozpoczął transmisję live true - tak false - nie 
+					'gid' => [0],	//ID grup do których ma wysyłać wiadomość. Wpisz 0 (bez nawiasów []) aby wiadomość dochodziła do wszystkich online.
 					'info_text' => 'Hejka {1} właśnie odpalił live {2} Zapraszamy!' //Tekst, który ma wysyłać gdy użytkownik odpali live {1} - nick {2} - link do kanału
 				]
 			]

@@ -60,6 +60,26 @@ CREATE TABLE `channel` (
 -- --------------------------------------------------------
 
 --
+-- Struktura tabeli dla tabeli `clan`
+--
+
+CREATE TABLE `clan` (
+  `id` int NOT NULL,
+  `tag` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `cuid` varchar(30) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `cid` int NOT NULL DEFAULT '0',
+  `cgid` int NOT NULL DEFAULT '0',
+  `lcgid` int NOT NULL DEFAULT '0',
+  `lcid` int NOT NULL DEFAULT '0',
+  `rcid` int NOT NULL DEFAULT '0',
+  `gcid` int NOT NULL DEFAULT '0',
+  `dcn` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '',
+  `acid` varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Struktura tabeli dla tabeli `command`
 --
 
@@ -179,6 +199,12 @@ ALTER TABLE `channel`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indeksy dla tabeli `clan`
+--
+ALTER TABLE `clan`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indeksy dla tabeli `command`
 --
 ALTER TABLE `command`
@@ -214,6 +240,12 @@ ALTER TABLE `users`
 ALTER TABLE `channel`
   MODIFY `id` int(255) NOT NULL AUTO_INCREMENT;
 
+--
+-- AUTO_INCREMENT dla tabeli `clan`
+--
+ALTER TABLE `clan`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  
 --
 -- AUTO_INCREMENT dla tabeli `command`
 --

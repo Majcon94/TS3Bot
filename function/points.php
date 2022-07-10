@@ -48,7 +48,7 @@
 							$this->bot->log(1, 'Kanał o ID:'.$this->config['functions_Points']['cid'].' nie istnieje Funkcja: Points()');
 						}
 					} catch (PDOException $e) {
-						$this->log(1, $e->getMessage());
+						$this->bot->log(1, $e->getMessage());
 					}
 				}
 				self::$points_time = time()+600;

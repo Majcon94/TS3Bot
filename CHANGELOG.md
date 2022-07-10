@@ -1,4 +1,10 @@
 # Changelog
+## [4.2.0] - 10.07.2022
+* Dodano nową funkcję clan() służy ona do zakładania kanałów gildyjnych. Aktualnie funkcja  jest w fazie beta i może nie działać prawidłowo.
+* Dodano nową funkcję monitoringPublicChannels() służy ona do  monitorowania publicznych kanałów i w razie potrzeby dodaje kanał.
+* Naprawiono kilka znanych błędów
+* Przygotowanie kodu do wersji PHP 8
+
 ## [4.1.9] - 13.12.2020
 * Dodano w channeMessege() możliwość wyboru czy ma dostawać poke czy wiadomość na PW, oraz bot nie będzie wysyłał już wiadomości po restarcie.
 * Naprawa błędów.
